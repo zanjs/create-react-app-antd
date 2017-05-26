@@ -1,23 +1,34 @@
-import React, { Component } from 'react';
-import { Button } from 'antd';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from "react";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import Helmet from "react-helmet";
+import { Provider } from "mobx-react";
 
+import NoMatch from "./views/NoMatch";
+import { Wrapper, Title, Nav, NavLink } from "./components/";
+import Store from "./stores/Store";
+import routes from "./routes";
+
+const title = "Template All The Things";
+const store = new Store();
+store.fetch();
 class App extends Component {
   render() {
     return (
-      <div className="App">
-        <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2>Welcome to React a</h2>
-        </div>
-        <p className="co" id="">
-          <Button type="primary">Button</Button>
-        </p>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
-      </div>
+      <Provider store={store}>
+        <Router>
+          <Wrapper>
+            <Helmet titleTemplate={`%s - ${title}`} />
+            <Title>react-router-mobx</Title>
+            <Nav>
+              {routes.map((route, i) => <NavLink key={i} {...route} />)}
+            </Nav>
+            <Switch>
+              {routes.map((route, i) => <Route key={i} {...route} />)}
+              <Route component={NoMatch} />
+            </Switch>
+          </Wrapper>
+        </Router>
+      </Provider>
     );
   }
 }

@@ -1,15 +1,14 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import App from './App';
-import registerServiceWorker from './registerServiceWorker';
-import './index.css';
+import React from "react";
+import { render } from "react-snapshot";
+import App from "./App";
+import "./index.css";
 
-ReactDOM.render(<App />, document.getElementById('root'));
-registerServiceWorker();
-
+const rootEl = document.getElementById("root");
+render(<App />, rootEl);
 
 if (module.hot) {
-  module.hot.accept('./App', () => {
-    ReactDOM.render(<App />, document.getElementById('root'));
-  })
+  module.hot.accept("./App", () => {
+    const NextApp = require("./App").default;
+    render(<NextApp />, rootEl);
+  });
 }

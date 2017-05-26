@@ -39,10 +39,8 @@ const cssFilename = 'static/css/[name].[contenthash:8].css';
 // (See https://github.com/webpack-contrib/extract-text-webpack-plugin/issues/27)
 // However, our output is structured with css, js and media folders.
 // To have this structure working with relative paths, we have to use custom options.
-const extractTextPluginOptions = shouldUseRelativeAssetPaths
-  ? // Making sure that the publicPath goes back to to build folder.
-    { publicPath: Array(cssFilename.split('/').length).join('../') }
-  : {};
+const extractTextPluginOptions = shouldUseRelativeAssetPaths ? // Making sure that the publicPath goes back to to build folder.
+  { publicPath: Array(cssFilename.split('/').length).join('../') } : {};
 
 // This is the production configuration.
 // It compiles slowly and is focused on producing a fast and minimal bundle.
@@ -55,6 +53,11 @@ module.exports = {
   devtool: 'source-map',
   // In production, we only want to load the polyfills and the app code.
   entry: [require.resolve('./polyfills'), paths.appIndexJs],
+  // entry: {
+  //   vendor: ["react", "react-dom", "react-router-dom"],
+  //   // polyfill: ["babel-polyfill"],
+  //   app: "./src/index",
+  // },
   output: {
     // The build folder.
     path: paths.appBuild,
@@ -84,12 +87,23 @@ module.exports = {
     // https://github.com/facebookincubator/create-react-app/issues/290
     extensions: ['.js', '.json', '.jsx'],
     alias: {
-      
+
       // Support React Native Web
       // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/
       'react-native': 'react-native-web',
     },
     plugins: [
+      new webpack.DefinePlugin({
+        "process.env": {
+          NODE_ENV: JSON.stringify("production")
+        }
+      }),
+      new webpack.NamedModulesPlugin(),
+      new webpack.optimize.OccurrenceOrderPlugin(true),
+      new webpack.optimize.CommonsChunkPlugin({
+        name: 'manifest',
+        chunks: ['vendor']
+      }),
       // Prevents users from importing files from outside of src/ (or node_modules/).
       // This often causes confusion because we only process files within src/ with babel.
       // To fix this, we prevent you from importing files out of src/ -- if you'd like to,
@@ -110,15 +124,13 @@ module.exports = {
       {
         test: /\.(js|jsx)$/,
         enforce: 'pre',
-        use: [
-          {
-            options: {
-              formatter: eslintFormatter,
-              
-            },
-            loader: require.resolve('eslint-loader'),
+        use: [{
+          options: {
+            formatter: eslintFormatter,
+
           },
-        ],
+          loader: require.resolve('eslint-loader'),
+        }, ],
         include: paths.appSrc,
       },
       // ** ADDING/UPDATING LOADERS **
@@ -160,7 +172,7 @@ module.exports = {
         test: /\.(js|jsx)$/,
         include: paths.appSrc,
         loader: require.resolve('babel-loader'),
-        
+
       },
       // The notation here is somewhat confusing.
       // "postcss" loader applies autoprefixer to our CSS.
@@ -177,11 +189,9 @@ module.exports = {
       {
         test: /\.css$/,
         loader: ExtractTextPlugin.extract(
-          Object.assign(
-            {
+          Object.assign({
               fallback: require.resolve('style-loader'),
-              use: [
-                {
+              use: [{
                   loader: require.resolve('css-loader'),
                   options: {
                     importLoaders: 1,
