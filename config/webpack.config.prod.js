@@ -52,12 +52,12 @@ module.exports = {
   // You can exclude the *.map files from the build during deployment.
   devtool: 'source-map',
   // In production, we only want to load the polyfills and the app code.
-  entry: [require.resolve('./polyfills'), paths.appIndexJs],
-  // entry: {
-  //   vendor: ["react", "react-dom", "react-router-dom"],
-  //   // polyfill: ["babel-polyfill"],
-  //   app: "./src/index",
-  // },
+  // entry: [require.resolve('./polyfills'), paths.appIndexJs],
+  entry: {
+    vendor: ["react", "react-dom", "react-router-dom"],
+    polyfill: ["babel-polyfill"],
+    app: "./src/index",
+  },
   output: {
     // The build folder.
     path: paths.appBuild,
@@ -101,8 +101,8 @@ module.exports = {
       new webpack.NamedModulesPlugin(),
       new webpack.optimize.OccurrenceOrderPlugin(true),
       new webpack.optimize.CommonsChunkPlugin({
-        name: 'manifest',
-        chunks: ['vendor']
+        name: ["polyfill", "vendor"],
+        minChunks: Infinity
       }),
       // Prevents users from importing files from outside of src/ (or node_modules/).
       // This often causes confusion because we only process files within src/ with babel.
